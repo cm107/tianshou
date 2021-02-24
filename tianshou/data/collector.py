@@ -152,6 +152,8 @@ class Collector(object):
         obs = self.env.reset()
         if self.preprocess_fn:
             obs = self.preprocess_fn(obs=obs).get("obs", obs)
+        if type(obs[0]) is dict and 'observation' in obs[0]: # Ad hoc solution for robotics goal-based env
+            obs = np.array([item_dict['observation'] for item_dict in obs])
         self.data.obs = obs
         for b in self._cached_buf:
             b.reset()
@@ -330,6 +332,8 @@ class Collector(object):
                 if self.preprocess_fn:
                     obs_reset = self.preprocess_fn(
                         obs=obs_reset).get("obs", obs_reset)
+                if isinstance(obs_reset[0], dict) and 'observation' in obs_reset[0]: # Ad hoc fix for robotics env
+                    obs_reset = np.array([item_dict['observation'] for item_dict in obs_reset])
                 obs_next[env_ind_local] = obs_reset
             self.data.obs = obs_next
             if is_async:
